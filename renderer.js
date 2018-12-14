@@ -19,14 +19,27 @@ var PythonShell = require('python-shell').PythonShell;
 //   }
 // }
 
-document.getElementById("record").addEventListener("click", () => {
+document.getElementById("snapshot").addEventListener("click", () => {
   let videobar = document.getElementById('urlInput').value; 
   let shell = new PythonShell('./python/camera_still.py', { 
     mode: "text",
     args: videobar
   }); 
   shell.on("message", (message) => {
+    document.getElementById("alertbox").innerHTML = message
+  })
+  shell.send("Hello")
+})
+
+document.getElementById("record").addEventListener("click", () => {
+  let videobar = document.getElementById('urlInput').value;
+  let shell = new PythonShell('./python/camera_record.py', {
+    mode: "text",
+    args: videobar
+  });
+  shell.on("message", (message) => {
     console.log(message)
+    document.getElementById("alertbox").innerHTML = message
   })
   shell.send("Hello")
 })

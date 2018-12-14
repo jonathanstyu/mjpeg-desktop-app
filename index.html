@@ -12,14 +12,20 @@
       <div class='row form-inline'>
         <input type='text' id='urlInput' class='form-control col' />
         <button id="preview" class='btn btn-primary'>Preview</button>
-        <button id="record" class='btn btn-info'>Record</button>
       </div>
       <div class='row'>
         <img id='imageCanvas' width='640px' height='480px' style='border:1px solid #d3d3d3'>
       </div>
+      <div class="alert alert-primary" role="alert" id='alertbox'></div>
       <div class='row'>
+        <div class="btn-group">
+          <button id="snapshot" class='btn btn-info'>Snapshot</button>
+          <button id="record" class='btn btn-info'>Record</button>
+        </div>
         <table class='table'>
-          <thead><th>URL</th></thead>
+          <thead>
+            <th>URL</th>
+          </thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
