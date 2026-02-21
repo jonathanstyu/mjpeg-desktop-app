@@ -3,33 +3,55 @@
   <head>
     <meta charset="UTF-8">
     <title>Insecam Video Grabber</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-      crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
-    <div id='app' class='container d-flex-column'>
-      <h1>Video</h1>
-      <div class='row form-inline'>
-        <input type='text' id='urlInput' class='form-control col' />
-        <button id="preview" class='btn btn-primary'>Preview</button>
-      </div>
-      <div class='row'>
-        <img id='imageCanvas' width='640px' height='480px' style='border:1px solid #d3d3d3'>
-      </div>
-      <div class="alert alert-primary" role="alert" id='alertbox'></div>
-      <div class='row'>
-        <div class="btn-group">
-          <button id="snapshot" class='btn btn-info'>Snapshot</button>
-          <button id="record" class='btn btn-info'>Record</button>
+    <main id="app" class="app-shell">
+      <header class="app-header">
+        <h1>MJPEG Capture Studio</h1>
+        <p>Preview a stream URL, then capture a still frame or short recording.</p>
+      </header>
+
+      <section class="panel">
+        <label for="urlInput" class="field-label">Stream URL</label>
+        <div class="url-row">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="http://example.com/mjpeg"
+            autocomplete="off"
+          />
+          <button id="preview" class="btn btn-primary">Preview</button>
         </div>
-        <table class='table'>
+        <div class="actions-row">
+          <button id="snapshot" class="btn btn-secondary">Take Snapshot</button>
+          <button id="record" class="btn btn-secondary">Record 5 Seconds</button>
+        </div>
+        <div id="alertbox" class="status-box" role="status" aria-live="polite">
+          Enter a stream URL to begin.
+        </div>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="preview-title">Live Preview</div>
+        <div class="preview-frame">
+          <img id="imageCanvas" alt="Stream preview">
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="table-title">Saved URLs (placeholder)</div>
+        <table class="history-table">
           <thead>
-            <th>URL</th>
+            <tr>
+              <th>URL</th>
+            </tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
-      </div>
-    </div>
+      </section>
+    </main>
     <script>
       // You can also require other files to run in this process
       require('./renderer.js')

@@ -1,27 +1,25 @@
 {
-  "name": "electron-quick-start",
+  "name": "mjpeg-desktop-app",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Desktop app for previewing and capturing MJPEG streams",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "electron",
+    "mjpeg",
+    "opencv"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
-    "electron": "^3.0.7"
+    "electron": "^40.6.0"
   },
   "dependencies": {
-    "electron-storage": "^1.0.7",
-    "mjpeg-camera": "^1.7.2",
-    "python-shell": "^1.0.6"
+    "python-shell": "^5.0.0"
   }
 }
