@@ -108,6 +108,20 @@ body {
   cursor: pointer;
 }
 
+.duration-select {
+  border: 1px solid #c8d4e2;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--text);
+}
+
+.duration-select:focus {
+  outline: 2px solid #b8dbff;
+  border-color: var(--primary);
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong));
 }
@@ -122,6 +136,12 @@ body {
 
 .btn:active {
   transform: translateY(1px);
+}
+
+.btn:disabled,
+.duration-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .status-box {
@@ -145,6 +165,12 @@ body {
   background: var(--error-bg);
   border-color: #f5c2c7;
   color: var(--error-text);
+}
+
+.status-box.recording {
+  background: #fff7e6;
+  border-color: #ffd08a;
+  color: #7a4a00;
 }
 
 .preview-frame {
