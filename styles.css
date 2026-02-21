@@ -29,8 +29,21 @@ body {
 }
 
 .app-shell {
-  width: min(920px, 94vw);
+  width: min(1200px, 95vw);
   margin: 24px auto;
+  display: grid;
+  gap: 16px;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(540px, 1.2fr) minmax(300px, 0.8fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.left-column,
+.right-column {
   display: grid;
   gap: 16px;
 }
@@ -55,7 +68,8 @@ body {
 
 .field-label,
 .preview-title,
-.table-title {
+.table-title,
+.panel-title {
   display: block;
   font-weight: 600;
   margin-bottom: 10px;
@@ -111,7 +125,6 @@ body {
 }
 
 .status-box {
-  margin-top: 12px;
   background: var(--status-bg);
   color: var(--status-text);
   border: 1px solid #c8ddfb;
@@ -160,6 +173,31 @@ body {
   text-align: left;
   padding: 8px;
   border-bottom: 1px solid #edf2f7;
+}
+
+.saved-row {
+  cursor: pointer;
+}
+
+.saved-row:hover td {
+  background: #f3f8ff;
+}
+
+.mini-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 980px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 700px) {

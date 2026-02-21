@@ -13,44 +13,64 @@
         <p>Preview a stream URL, then capture a still frame or short recording.</p>
       </header>
 
-      <section class="panel">
-        <label for="urlInput" class="field-label">Stream URL</label>
-        <div class="url-row">
-          <input
-            type="text"
-            id="urlInput"
-            placeholder="http://example.com/mjpeg"
-            autocomplete="off"
-          />
-          <button id="preview" class="btn btn-primary">Preview</button>
-        </div>
-        <div class="actions-row">
-          <button id="snapshot" class="btn btn-secondary">Take Snapshot</button>
-          <button id="record" class="btn btn-secondary">Record 5 Seconds</button>
-        </div>
-        <div id="alertbox" class="status-box" role="status" aria-live="polite">
-          Enter a stream URL to begin.
-        </div>
-      </section>
+      <div class="workspace-grid">
+        <section class="left-column">
+          <div class="panel">
+            <label for="urlInput" class="field-label">Stream URL</label>
+            <div class="url-row">
+              <input
+                type="text"
+                id="urlInput"
+                placeholder="http://example.com/mjpeg"
+                autocomplete="off"
+              />
+              <button id="preview" class="btn btn-primary">Preview</button>
+            </div>
+            <div class="actions-row">
+              <button id="snapshot" class="btn btn-secondary">Take Snapshot</button>
+              <button id="record" class="btn btn-secondary">Record 5 Seconds</button>
+            </div>
+          </div>
 
-      <section class="panel preview-panel">
-        <div class="preview-title">Live Preview</div>
-        <div class="preview-frame">
-          <img id="imageCanvas" alt="Stream preview">
-        </div>
-      </section>
+          <section class="panel preview-panel">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-frame">
+              <img id="imageCanvas" alt="Stream preview">
+            </div>
+          </section>
+        </section>
 
-      <section class="panel">
-        <div class="table-title">Saved URLs (placeholder)</div>
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>URL</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </section>
+        <aside class="right-column">
+          <section class="panel">
+            <div class="panel-title">Session Status</div>
+            <div id="alertbox" class="status-box" role="status" aria-live="polite">
+              Enter a stream URL to begin.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="table-title">Saved URLs (click one to load)</div>
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </section>
+
+          <section class="panel mini-panel">
+            <div class="panel-title">Quick Notes</div>
+            <p>Reserve this area for camera labels, schedules, or shortcuts.</p>
+          </section>
+
+          <section class="panel mini-panel">
+            <div class="panel-title">Upcoming Items</div>
+            <p>You can add output folder, camera presets, and automation controls here.</p>
+          </section>
+        </aside>
+      </div>
     </main>
     <script>
       // You can also require other files to run in this process
