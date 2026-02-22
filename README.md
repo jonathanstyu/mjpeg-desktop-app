@@ -1,73 +1,53 @@
 # MJPEG Desktop App
 
-Desktop Electron app for working with MJPEG camera streams.  
-It lets you:
+Native desktop app for working with MJPEG streams using PySide6 + OpenCV.
 
-- Preview a stream URL in-app.
-- Capture a single snapshot frame (`.png`).
-- Record a short 5-second clip (`.mp4`).
-- Save and reuse recent stream URLs from local storage.
+## Features
 
-This repo now also includes an in-progress all-Python shell (`PySide6`) that reuses
-the same Python camera logic.
-
-## How It Works
-
-- Electron renders the UI (`index.html`, `renderer.js`, `styles.css`).
-- The renderer launches Python scripts via `python-shell`.
-- Python wrappers call shared camera services:
-  - `python/camera_still.py` -> `native_app/services/camera_service.py`
-  - `python/camera_record.py` -> `native_app/services/camera_service.py`
+- Stream preview from URL
+- Snapshot capture to PNG
+- Timed clip recording to MP4
+- Persistent output folder setting (browse/reset)
+- Saved URL library with pin/unpin, rename, delete, and clear-all
+- Credential-safe URL display (embedded credentials are masked in UI)
 
 ## Tech Stack
 
-- Electron (desktop shell)
-- Node.js (app runtime)
-- Python + OpenCV (media capture)
-- PySide6 (native shell migration target)
+- Python 3
+- PySide6
+- OpenCV (`opencv-python`)
 
 ## Requirements
 
-- Node.js 18+
-- Python 3 available in your environment
-- OpenCV for Python (`cv2`)
-
-## Run Locally
-
-```bash
-npm install
-npm start
-```
-
-## Run Native Python Shell (Migration Preview)
+- Python 3.10+ recommended
+- Install dependencies:
 
 ```bash
 python3 -m pip install -r requirements-native.txt
+```
+
+## Run
+
+```bash
 python3 -m native_app.main
 ```
 
-The native shell currently includes:
+## Tests
 
-- URL entry and saved URL history
-- Preview loading (single-frame fetch from stream)
-- Snapshot capture
-- Timed clip recording with countdown and status updates
+```bash
+python3 -m unittest discover -s native_app/tests -p 'test_*.py'
+```
 
 ## Usage
 
 1. Enter an MJPEG stream URL.
-2. Click `Preview` to load the stream.
-3. Click `Take Snapshot` to save a PNG image.
-4. Click `Record 5 Seconds` to save a short MP4 clip.
-
-## Output Files
-
-Current Python scripts write files one level above the repo directory:
-
-- Snapshot: `../frame--YY-MM-DD-HH-MM.png`
-- Recording: `../output--YY-MM-DD-HH-MM.mp4`
+2. Click `Preview`.
+3. Click `Take Snapshot` or `Record Clip`.
+4. Manage saved URLs from the right-side panel.
+5. Set output folder from `Session Status` (`Browse...` or `Reset`).
 
 ## Notes
 
-- Saved URLs are stored in browser local storage (up to 20 entries).
-- Window defaults to a desktop layout and supports responsive behavior for smaller screens.
+- Saved URLs are capped at 20 entries.
+- Pinned URLs are protected from auto-pruning.
+- If all saved URLs are pinned, new URLs are not added until one is unpinned or deleted.
