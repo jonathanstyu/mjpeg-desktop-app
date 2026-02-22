@@ -8,19 +8,23 @@ It lets you:
 - Record a short 5-second clip (`.mp4`).
 - Save and reuse recent stream URLs from local storage.
 
+This repo now also includes an in-progress all-Python shell (`PySide6`) that reuses
+the same Python camera logic.
+
 ## How It Works
 
 - Electron renders the UI (`index.html`, `renderer.js`, `styles.css`).
 - The renderer launches Python scripts via `python-shell`.
-- OpenCV (`cv2`) in Python handles frame capture and video writing:
-  - `python/camera_still.py` saves one frame.
-  - `python/camera_record.py` records a 5-second clip.
+- Python wrappers call shared camera services:
+  - `python/camera_still.py` -> `native_app/services/camera_service.py`
+  - `python/camera_record.py` -> `native_app/services/camera_service.py`
 
 ## Tech Stack
 
 - Electron (desktop shell)
 - Node.js (app runtime)
 - Python + OpenCV (media capture)
+- PySide6 (native shell migration target)
 
 ## Requirements
 
@@ -34,6 +38,20 @@ It lets you:
 npm install
 npm start
 ```
+
+## Run Native Python Shell (Migration Preview)
+
+```bash
+python3 -m pip install -r requirements-native.txt
+python3 -m native_app.main
+```
+
+The native shell currently includes:
+
+- URL entry and saved URL history
+- Preview loading (single-frame fetch from stream)
+- Snapshot capture
+- Timed clip recording with countdown and status updates
 
 ## Usage
 
