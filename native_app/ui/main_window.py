@@ -29,11 +29,11 @@ from PySide6.QtWidgets import (
 
 from native_app.services.camera_service import (
     PreviewFrame,
-    capture_preview_frame,
     capture_snapshot,
     record_clip,
 )
 from native_app.services.storage import SavedUrl, UrlStore, mask_url_credentials
+from native_app.workers.preview_stream_thread import PreviewStreamThread
 from native_app.workers.task_thread import TaskThread
 
 
@@ -52,7 +52,10 @@ class MainWindow(QMainWindow):
         self._settings = QSettings("mjpeg-desktop-app", "native-shell")
         self._url_store = UrlStore(self._settings)
         self._task_thread: TaskThread | None = None
+        self._preview_thread: PreviewStreamThread | None = None
         self._preview_pixmap: QPixmap | None = None
+        self._preview_url = ""
+        self._preview_first_frame_rendered = False
         self._latest_output_path: Path | None = None
         self._output_dir: Path = self._url_store.default_output_dir()
         self._has_saved_urls = False
@@ -180,12 +183,6 @@ class MainWindow(QMainWindow):
         saved_actions.addWidget(self.clear_all_button)
         saved_layout.addLayout(saved_actions)
         grid.addWidget(saved_group, 1, 1)
-
-        notes_group = QGroupBox("Migration Notes")
-        notes_layout = QVBoxLayout(notes_group)
-        notes_layout.addWidget(QLabel("This shell keeps output behavior aligned with the Electron version."))
-        notes_layout.addWidget(QLabel("Saved URL management now includes pin, rename, delete, and clear-all controls."))
-        grid.addWidget(notes_group, 2, 1)
 
         root.setStyleSheet(
             """
@@ -458,6 +455,78 @@ class MainWindow(QMainWindow):
         if self._task_thread and not self._task_thread.isRunning():
             self._task_thread = None
 
+    def _is_preview_running(self) -> bool:
+        return bool(self._preview_thread and self._preview_thread.isRunning())
+
+    def _start_preview_stream(self, video_url: str, history_hint: str) -> None:
+        self._preview_url = video_url
+        self._preview_first_frame_rendered = False
+        thread = PreviewStreamThread(video_url, target_fps=12.0, parent=self)
+        self._preview_thread = thread
+        thread.frame_ready.connect(lambda frame: self._handle_preview_frame(frame, history_hint))
+        thread.failed.connect(lambda error_text: self._handle_preview_error(error_text, history_hint))
+        thread.finished.connect(self._handle_preview_finished)
+        thread.start()
+
+        self.preview_button.setText("Stop Preview")
+        self._set_status(f"Connecting live preview...{history_hint}")
+
+    def _stop_preview_stream(self) -> None:
+        thread = self._preview_thread
+        if not thread:
+            self.preview_button.setText("Preview")
+            self._preview_url = ""
+            self._preview_first_frame_rendered = False
+            return
+
+        if thread.isRunning():
+            thread.stop()
+            thread.wait(1500)
+
+        if not thread.isRunning():
+            thread.deleteLater()
+            if thread is self._preview_thread:
+                self._preview_thread = None
+
+        self.preview_button.setText("Preview")
+        self._preview_url = ""
+        self._preview_first_frame_rendered = False
+
+    def _handle_preview_finished(self) -> None:
+        finished_thread = self.sender()
+        if isinstance(finished_thread, PreviewStreamThread):
+            finished_thread.deleteLater()
+
+        if finished_thread is self._preview_thread:
+            self._preview_thread = None
+            self.preview_button.setText("Preview")
+            self._preview_url = ""
+            self._preview_first_frame_rendered = False
+
+    def _handle_preview_frame(self, preview: object, history_hint: str) -> None:
+        frame = preview
+        if not isinstance(frame, PreviewFrame):
+            self._set_status("Preview failed: invalid frame payload.", "error")
+            self._stop_preview_stream()
+            return
+
+        image = QImage(
+            frame.rgb_bytes,
+            frame.width,
+            frame.height,
+            frame.width * 3,
+            QImage.Format.Format_RGB888,
+        ).copy()
+        self._preview_pixmap = QPixmap.fromImage(image)
+        self._render_preview_pixmap()
+
+        if not self._preview_first_frame_rendered:
+            self._preview_first_frame_rendered = True
+            self._set_status(f"Live preview active.{history_hint}", "success")
+
+    def _handle_preview_error(self, error_text: str, history_hint: str) -> None:
+        self._set_status(f"Preview failed: {error_text}{history_hint}", "error")
+
     def _handle_saved_url_click(self, item: QListWidgetItem) -> None:
         data = item.data(Qt.ItemDataRole.UserRole)
         if not isinstance(data, dict):
@@ -541,6 +610,14 @@ class MainWindow(QMainWindow):
         return self._output_dir
 
     def _handle_preview(self) -> None:
+        current_input_url = self.url_input.text().strip()
+        if self._is_preview_running():
+            if not current_input_url or current_input_url == self._preview_url:
+                self._stop_preview_stream()
+                self._set_status("Live preview stopped.", "info")
+                return
+            self._stop_preview_stream()
+
         video_url = self._current_video_url()
         if not video_url:
             return
@@ -548,29 +625,7 @@ class MainWindow(QMainWindow):
         self._clear_output_action()
         blocked = self._mark_url_as_used(video_url)
         history_hint = self._history_hint_suffix(blocked)
-        self._set_status(f"Loading preview frame...{history_hint}")
-
-        def on_success(preview: object) -> None:
-            frame = preview
-            if not isinstance(frame, PreviewFrame):
-                self._set_status("Preview failed: invalid frame payload.", "error")
-                return
-
-            image = QImage(
-                frame.rgb_bytes,
-                frame.width,
-                frame.height,
-                frame.width * 3,
-                QImage.Format.Format_RGB888,
-            ).copy()
-            self._preview_pixmap = QPixmap.fromImage(image)
-            self._render_preview_pixmap()
-            self._set_status(f"Preview updated.{history_hint}", "success")
-
-        def on_failure(error_text: str) -> None:
-            self._set_status(f"Preview failed: {error_text}{history_hint}", "error")
-
-        self._start_task(lambda: capture_preview_frame(video_url), on_success, on_failure)
+        self._start_preview_stream(video_url, history_hint)
 
     def _render_preview_pixmap(self) -> None:
         if not self._preview_pixmap:
@@ -587,6 +642,7 @@ class MainWindow(QMainWindow):
         if not video_url:
             return
 
+        self._stop_preview_stream()
         output_dir = self._current_output_dir()
         if output_dir is None:
             return
@@ -617,6 +673,7 @@ class MainWindow(QMainWindow):
         if not video_url:
             return
 
+        self._stop_preview_stream()
         output_dir = self._current_output_dir()
         if output_dir is None:
             return
@@ -682,3 +739,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event) -> None:  # type: ignore[override]
         super().resizeEvent(event)
         self._render_preview_pixmap()
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        self._stop_preview_stream()
+        super().closeEvent(event)

@@ -51,3 +51,8 @@ python3 -m unittest discover -s native_app/tests -p 'test_*.py'
 - Saved URLs are capped at 20 entries.
 - Pinned URLs are protected from auto-pruning.
 - If all saved URLs are pinned, new URLs are not added until one is unpinned or deleted.
+
+## Migration Notes
+
+- This shell keeps output behavior aligned with the previous implementation.
+- Saved URL management includes pin, rename, delete, and clear-all controls.
